@@ -34,7 +34,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const { 'nextauth.token': token } = parseCookies();
 
     if(token) {
-      api.get("me").then(response => console.log(response))
+      api.get("me").then(response => {
+        const { email, roles, permissions } = response.data;
+
+        setUser({ email, roles, permissions })
+      })
     }
   }, [])
 
@@ -62,6 +66,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         roles,
         permissions
       });
+
+      api.defaults.headers["Authorization"] = `Bearer ${token}`;
 
       Router.push("/dashboard");
     } catch(err) {
