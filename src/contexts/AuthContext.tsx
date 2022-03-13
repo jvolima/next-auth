@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
 import { api } from "../services/api";
 import Router from "next/router";
-import { parseCookies, setCookie } from "nookies"
+import { destroyCookie, parseCookies, setCookie } from "nookies"
 
 type SignInCredentials = {
   email: string;
@@ -22,6 +22,13 @@ type AuthContextData = {
 
 export const AuthContext = createContext({} as AuthContextData)
 
+export function signOut() {
+  destroyCookie(undefined, "nextauth.token");
+  destroyCookie(undefined, "nextauth.refreshToken");
+
+  Router.push("/");
+}
+
 type AuthProviderProps = {
   children: ReactNode;
 }
@@ -38,6 +45,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const { email, roles, permissions } = response.data;
 
         setUser({ email, roles, permissions })
+      }).catch(error => {
+        signOut();
       })
     }
   }, [])
